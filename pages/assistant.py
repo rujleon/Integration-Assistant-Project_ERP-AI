@@ -28,25 +28,30 @@ except Exception as e:
     st.stop()
 
 # --- Interface Streamlit ---
-st.title("🤖 Assistant intelligent pour DB")
-st.write("Pose une question en langage naturel, et l'assistant génèrera et exécutera la requête SQL correspondante.")
+st.title("Assistant intelligent pour DB")
+st.write("Pose une question en langage naturel, et l'assistant génèrera une reponse.")
 
-question = st.text_input("💬 Question :")
+# Initialisation de l'état de la session
+if 'last_question' not in st.session_state:
+    st.session_state.last_question = ""
+if 'show_sql' not in st.session_state:
+    st.session_state.show_sql = False
 
-# Créer deux colonnes pour les boutons EN DESSOUS du input
-col1, col2 = st.columns([1, 1])
+# Séparer le formulaire pour la question seulement
+with st.form(key="query_form"):
+    question = st.text_input("💬 Question :", value="", key="question_input")
+    submitted = st.form_submit_button("Exécuter", use_container_width=True)
 
-with col1:
-    retour_clicked = st.button(" ⬅️ Retour ", use_container_width=True)
-    
-with col2:
-    envoyer_clicked = st.button("🚀 Envoyer", use_container_width=True)
+# Bouton Retour en dehors du formulaire
+retour_clicked = st.button(" ⬅️ Retour ")
 
+
+# Gestion du bouton Retour
 if retour_clicked:
-    #st.switch_page("app.py")
     st.switch_page("Dashboard.py")
 
-if envoyer_clicked and question.strip() != "":
+# Gestion de l'exécution (bouton Envoyer ou touche Entrée)
+if submitted and question.strip() != "":
     with st.spinner("💡 Génération de la requête SQL et exécution..."):
         # 1️⃣ Générer la requête SQL
         prompt = f"""
@@ -64,7 +69,6 @@ if envoyer_clicked and question.strip() != "":
             st.error(f"❌ Erreur lors de la génération de la requête : {e}")
             st.stop()
 
-
         # Nettoyage : retirer ```sql et autres balises
         sql_query = re.sub(r"```sql|```", "", sql_query, flags=re.IGNORECASE).strip()
 
@@ -78,8 +82,37 @@ if envoyer_clicked and question.strip() != "":
                     result = conn.execute(text(sql_query))
                     df = pd.DataFrame(result.fetchall(), columns=result.keys())
 
+                # ✅ SUCCÈS - Affichage avec réponse rédigée
                 st.success("✅ Requête exécutée avec succès !")
-                st.code(sql_query, language="sql")
-                st.dataframe(df)
+                
+                # Afficher la requête SQL seulement si la case est cochée
+                if st.session_state.show_sql:
+                    st.code(sql_query, language="sql")
+                
+                # Générer une réponse rédigée avec Gemini
+                with st.spinner("📝 Rédaction de la réponse..."):
+                    response_prompt = f"""
+                    Tu es un assistant qui explique les résultats d'une requête SQL de manière naturelle et professionnelle.
+                    
+                    Question de l'utilisateur : "{question}"
+                    Requête SQL exécutée : "{sql_query}"
+                    Résultats obtenus : {df.to_dict('records')}
+                    
+                    Donne une réponse rédigée et naturelle qui répond à la question de l'utilisateur en utilisant les données obtenues.
+                    Sois concis mais informatif.
+                    """
+                    
+                    try:
+                        response_text = model.generate_content(response_prompt)
+                        st.write(" Résultat :")
+                        st.write(response_text.text)
+                    except Exception as e:
+                        st.warning("⚠️ Impossible de générer une réponse rédigée, affichage des données brutes :")
+                        st.dataframe(df)
+                
+                # Afficher aussi le dataframe complet en dessous
+                with st.expander("🔍 Voir les données brutes", expanded=False):
+                    st.dataframe(df)
+                    
             except Exception as e:
                 st.error(f"❌ Erreur lors de l'exécution de la requête : {e}")
