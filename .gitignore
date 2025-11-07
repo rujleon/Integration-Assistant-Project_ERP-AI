@@ -1,0 +1,103 @@
+# ==========================
+#   PYTHON / STREAMLIT PROJECT
+# ==========================
+
+# --- Environnements virtuels ---
+.venv/
+venv/
+env/
+
+# --- Fichiers d'environnement (clés API, mots de passe, etc.) ---
+.env
+api.env
+*.env
+!.env.example  # Template pour les variables
+
+# --- Cache et fichiers compilés ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# --- Fichiers de log ---
+*.log
+logs/
+
+# --- Fichiers temporaires d'éditeur ---
+*.swp
+*.swo
+*.bak
+*~
+
+# --- Jupyter et notebooks (si jamais utilisés) ---
+.ipynb_checkpoints/
+*.ipynb
+
+# --- Dossiers de configuration IDE ---
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# --- Fichiers système inutiles ---
+.DS_Store
+Thumbs.db
+
+# --- Fichiers de build ou dépendances ---
+*.egg-info/
+dist/
+build/
+.eggs/
+__pypackages__/
+
+# --- Fichiers et caches Streamlit ---
+.streamlit/
+
+# --- Autres fichiers confidentiels ou temporaires ---
+*.sqlite3
+*.db
+*.pkl
+*.joblib
+*.model
+
+# --- Dossiers éventuels de données ---
+data/
+datasets/
+tmp/
+temp/
+outputs/
+checkpoints/
+models/
+
+# ==============================
+# STRUCTURE SPÉCIFIQUE A INCLURE
+# ==============================
+
+# --- Fichiers Python principaux À GARDER ---
+!ai_api.py
+!db_connection.py
+!Dashboard.py
+!display_db.py
+
+# --- Pages Streamlit - TOUS LES FICHIERS ---
+pages/
+!pages/
+!pages/__init__.py
+!pages/combine3.py
+!pages/add_data.py
+!pages/ecriture_db.py
+!pages/assistant.py
+!pages/ecriture_gl.py
+
+
+# --- Fichiers de configuration À GARDER ---
+!.gitignore
+!README.md
+!requirements.txt
+!config.py
+!.env.example
+
+# --- Autres fichiers potentiels ---
+!setup.py
+!pyproject.toml
+!*.md
